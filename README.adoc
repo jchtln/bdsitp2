@@ -86,14 +86,20 @@ db.publis.find({"authors":"Jeffrey D. Ullman"})
 +
 [source, js]
 ----
+db.publis.find({"authors.0":"Jeffrey D. Ullman"}).count()
 
+db.publis.find({"authors.0":"Jeffrey D. Ullman"},{authors:1})
 ----
+Le .0 sélectionne le premier élément d'un tableau.
+
 +
 . Nom des éditeurs (publisher) et titre des publications dont “Jeffrey D. Ullman” est le seul auteur
 +
 [source, js]
 ----
+ db.publis.find({"authors":"[Jeffrey D. Ullman]"},{_id:0,publisher:1,title:1})
 
+db.publis.find({"authors.0":"Jeffrey D. Ullman","authors.1":{$exists:false}},{_id:0,publisher:1,title:1})
 ----
 +
 . Titre des publications dont le titre contient le mot "database"
@@ -167,7 +173,9 @@ le nombre de publications. Pour ces derniers, ne retourner que ceux ayant plus 2
 +
 [source,js]
 ----
-
+db.publis.aggregate( [
+    {$match: }
+])
 ----
 +
 . Pour chaque éditeur, calculer la moyenne du nombre de publications par année. Trier le résultat par moyenne décroissante
