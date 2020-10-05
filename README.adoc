@@ -120,7 +120,7 @@ db.publis.find({"authors.0":"Jeffrey D. Ullman","authors.1":{$exists:false}},{_i
 +
 [source, js]
 ----
-
+db.publis.distinct("authors")
 ----
 +
 . 	Pour les publications contenant le mot "database" et dont le titre de l’ouvrage (booktitle)
