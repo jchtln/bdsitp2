@@ -106,8 +106,7 @@ db.publis.find({"authors.0":"Jeffrey D. Ullman","authors.1":{$exists:false}},{_i
 +
 [source, js]
 ----
-
-
+ db.publis.find({"title":{$regex:/database/i }})
 ----
 +
 . Liste distincte de tous les editeurs (“publisher”)
@@ -174,7 +173,9 @@ le nombre de publications. Pour ces derniers, ne retourner que ceux ayant plus 2
 [source,js]
 ----
 db.publis.aggregate( [
-    {$match: }
+    {$match: {"publisher":{$exists:true}}},
+    {$group: {_id: {"editeur":"$publisher", "année":"$year"}, "nbpublis":{$sum:1}}},
+    {$match: {"nbpublis": {$gte:200}}}
 ])
 ----
 +
@@ -182,7 +183,9 @@ db.publis.aggregate( [
 +
 [source,js]
 ----
-
+db.publis.aggregate( [
+    {}
+])
 ----
 +
 . 	**** Modifier toutes les publications ayant des pages pour ajouter le champ “pp” avec pour valeur le motif suivant : “start–end”
