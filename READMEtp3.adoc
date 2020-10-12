@@ -84,7 +84,7 @@ la clé du emit() doit être un document.
 [source,js]
 ----
 var map = function(){
-    emit("type":this.type,"annee":this.year},1);
+    emit({"type":this.type,"annee":this.year},1);
 }
 
 var reduce = function(cle,valeurs){
