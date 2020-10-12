@@ -113,7 +113,7 @@ db.publis.find({"authors.0":"Jeffrey D. Ullman","authors.1":{$exists:false}},{_i
 +
 [source, js]
 ----
-
+db.publis.distinct("authors",{"publisher":{$exists:true}}).count()
 ----
 +
 . Liste de tous les auteurs distincts
@@ -128,21 +128,32 @@ et la page de départ existent ; trier par titre d’ouvrage et pages de départ
 +
 [source,js]
 ----
-
+db.publis.aggregate( [
+    {$match: {"title": {$regex:/database/i}, "booktitle":{$exists:true}}}
+    {$group: {"title":1,"pages.start":2}}
+    ])
 ----
 +
 . Projeter le résultat précédent par titres, titres d’ouvrage et pages
 +
 [source,js]
 ----
-
+db.publis.aggregate( [
+    {("titres","pages")}
+    {$match: {"title": {$regex:/database/i}, "booktitle":{$exists:true}}}
+    {$group: {"title":1,"pages.start":2}}
+    ])
 ----
 +
 . Compter, pour le résultat précédent, le nombre de publications retournées
 +
 [source,js]
 ----
-
+db.publis.aggregate( [
+    {("titres","pages")}
+    {$match: {"title": {$regex:/database/i}, "booktitle":{$exists:true}}}
+    {$group: {"title":1,"pages.start":2}}
+    ]).count()
 ----
 +
 . Projeter le résultat précédent par titres, titres d’ouvrage et pages
@@ -156,7 +167,10 @@ et la page de départ existent ; trier par titre d’ouvrage et pages de départ
 +
 [source,js]
 ----
-
+db.publis.aggregate( [
+    {$match: {"auteur"}},
+    {$group: "nbpublis": {$sum:1}}
+])
 ----
 +
 . 	Pour chaque éditeur (s’il existe),

@@ -1,0 +1,111 @@
+﻿= TP 3 - Map & Reduce
+
+== Rappel de la syntaxe MongoDB
+
+
+Pour exprimer une requête MapReduce, il faut définir une fonction de map,
+une fonction de reduce et éventuellement un filtre (optionnel),
+lancer le tout avec l’opérateur mapReduce et consulter le résultat. Soit:
+[cols="<,<4", width="100%"]
+|===================
+| *map*	        | var mapFunction = function () {emit(this.year, 1);};
+| *reduce*      | var reduceFunction = function (key, values) {return Array.sum(values);};
+| *filtre*      | var queryParam = {query : {}, out : "resultat"}
+|               | var queryParam = {query : {"year":2000}, out: {"inline": 1}}
+| *exécution*   | db.publis.mapReduce(mapFunction, reduceFunction, queryParam);
+| _résultat_    | à l'écran pour *inline* ou db.resultat.find();
+|===================
+
+
+
+== Map & Reduce sur la BD dblp
+
+Pour les recherches suivantes, donnez la requête MapReduce correspondante.
+
+. Pour chaque document de type livre, émettre le document avec pour clé « title » ;
+Pour chacun de ces livres, donner le nombre de ses auteurs
++
+[source, js]
+----
+var map = function() {
+    // on peut enlever le if car dans var query on précise le type
+    if(this.type == "Book") emit(this.title, this.authors.length);
+}
+
+var reduce = function(cle,valeurs) {
+return Array.sum(valeurs);
+}
+
+var query = {
+    query: {"type":"Book"}, out:"question1"
+}
+
+db.publis.mapReduce(map,reduce,query);
+
+
+db.question1.find().sort({"value":-1})
+----
++
+. Pour chaque document ayant « booktitle » (chapitre) publié par Springer, donner le nombre de ses chapitres.
++
+[source, js]
+----
+var map = function(){
+    emit(this.booktitle, )
+}
+
+var reduce = function(cle,valeurs){
+    return Array.sum(valeurs);
+}
+
+var query = {
+    query: {"booktitles":{$exists:true}, out:"question2"}
+}
+----
++
+[]
+[WARNING]
+====
+la fonction de reduce n’est évaluée que lorsqu’il y a au moins 2 documents pour une même clé.
+Il est donc nécessaire d’appliquer un filtre après génération du résultat.
+====
+. Pour chaque éditeur « Springer », donner le nombre de publication par année
++
+[source,js]
+----
+
+----
+
+. Pour chaque clé « publisher & année » (pour ceux qui ont un publisher), donner le nombre de publications
++
+[TIP]
+la clé du emit() doit être un document.
++
+[source,js]
+----
+var map = function(){
+    emit("type":this.type,"annee":this.year},1);
+}
+
+var reduce = function(cle,valeurs){
+    return Array.sum(valeurs);
+}
+var query = {
+    query: {}, out:"question4"
+}
+
+db.publis.mapReduce(map,reduce,query)
+
+db.question4.find()
+----
+. Pour l’auteur « Toru Ishida », donner le nombre de publication par année
+. Pour l’auteur « Toru Ishida », donner le nombre moyen de pages pour ses articles (type Article)
+. Pour chaque auteur, donner le titre de ses publications
++
+WARNING: la sortie du map et du reduce doit être un document (pas un tableau)
+. Pour chaque auteur, donner le nombre de publications associé à chaque année
+. Pour l’éditeur « Springer », donner le nombre d’auteurs par année
+. Compter les publications de plus de 3 auteurs
+. Donner pour chaque publieur, donner le nombre moyen de pages par publication
+. Pour chaque auteur, donner le minimum et le maximum des années, ainsi que le nombre de publication total
+
