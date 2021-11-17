@@ -1,4 +1,6 @@
-﻿= TP 2 - Requêtes sur une BD non normalisée
+﻿
+
+= TP 2 - Requêtes sur une BD non normalisée
 
 Détectez dans votre repo l’archive dblp.json.zip puis la décompresser dans /tmp/<votreRepo>/data.
 
@@ -145,6 +147,19 @@ db.publis.aggregate( [
     ])
 ----
 +
+[source,js]
+----
+db.publis.aggregate( [
+    { $match: {
+        title: /database/i,
+        booktitle: { $exists: true },
+        "pages.start": { $exists: true}
+    }},
+    { $count: "Nombre de résultats :"}
+    ]);
+
+----
++
 . Compter, pour le résultat précédent, le nombre de publications retournées
 +
 [source,js]
@@ -156,11 +171,26 @@ db.publis.aggregate( [
     ]).count()
 ----
 +
+[source,js]
+----
+
+----
++
 . Projeter le résultat précédent par titres, titres d’ouvrage et pages
 +
 [source,js]
 ----
-
+db.publis.aggregate([
+    {$match: {
+        "title": /database/i,
+        "booktitle": { $exists: true},
+        "pages.start": { $exists: true }
+    }},
+    { $group: {
+        _id: "$type",
+        "nb_publis": { $sum: 1}
+    }}
+]);
 ----
 +
 . Compter le nombre de publications par auteur. Trier le résultat par ordre décroissant
@@ -173,12 +203,59 @@ db.publis.aggregate( [
 ])
 ----
 +
+[source,js]
+----
+db.publis.aggregate([
+    {$unwind: "$authors"},
+    { $group: {
+        _id:"authors",
+        "nb_publis": { $sum: 1}
+    }},
+    { $project: {
+        "authors":1,
+        "nb_publis":1
+    }},
+    { $sort: {
+        "nb_publis":1
+    }},
+]);
+----
 . 	Pour chaque éditeur (s’il existe),
 donner l’année moyenne et le nombre de publications. Trier le résultat par le nombre de publications décroissant
 +
 [source,js]
 ----
-
+db.publis.aggregate([
+    {$match: "$publisher"},
+    { $group: {
+        _id:"years",
+        "years": {$avg: 1}
+    }},
+    { $sort: {
+        "nb_publis":1
+    }},
+]);
+----
++
+[source,js]
+----
+db.publis.aggregate([
+    { $match: {
+        publisher: {exists: true}
+    }},
+    { $group: {
+        _id: "$publisher",
+        nb_publis: { $sum:1},
+        annee_moyenne: { $avg: "$year"}
+    }},
+    { $project: {
+        nb_publis:1,
+        annee_moyenne:1
+    }},
+    { $sort : {
+        nb_publis: -1
+    }}
+]);
 ----
 +
 . 	Compter par année et éditeur (s’il existe),
@@ -198,7 +275,9 @@ db.publis.aggregate( [
 [source,js]
 ----
 db.publis.aggregate( [
-    {}
+    {
+        {$match: {}
+    }
 ])
 ----
 +
